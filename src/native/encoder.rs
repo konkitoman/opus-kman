@@ -1,15 +1,19 @@
-use crate::TEncoder;
+use crate::{Application, Error, SampleRate, TEncoder};
 
 pub struct Encoder {
     encoder: *mut audiopus_sys::OpusEncoder,
     sample_rate: SampleRate,
-    channels: u8,
+    channels: u32,
     application: Application,
 }
 
 impl TEncoder for Encoder {
     /// max channels 2 min 1
-    fn new(sample_rate: SampleRate, channels: u8, application: Application) -> Result<Self, Error> {
+    fn new(
+        sample_rate: SampleRate,
+        channels: u32,
+        application: Application,
+    ) -> Result<Self, Error> {
         let mut error = 0;
         let encoder = unsafe {
             audiopus_sys::opus_encoder_create(
@@ -73,7 +77,7 @@ impl TEncoder for Encoder {
 
 #[cfg(test)]
 mod tests {
-    use crate::Encoder;
+    use crate::{Encoder, TEncoder};
 
     #[test]
     fn create_encoder() {

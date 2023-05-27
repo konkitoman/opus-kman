@@ -1,14 +1,14 @@
-use crate::TDecoder;
+use crate::{Error, SampleRate, TDecoder};
 
 pub struct Decoder {
     decoder: *mut audiopus_sys::OpusDecoder,
     sample_rate: SampleRate,
-    channels: u8,
+    channels: u32,
 }
 
 impl TDecoder for Decoder {
     /// max channels 2 min 1
-    fn new(sample_rate: SampleRate, channels: u8) -> Result<Self, Error> {
+    fn new(sample_rate: SampleRate, channels: u32) -> Result<Self, Error> {
         let mut error = 0;
         let decoder = unsafe {
             audiopus_sys::opus_decoder_create(
@@ -80,7 +80,7 @@ impl TDecoder for Decoder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Decoder, Encoder};
+    use crate::{Decoder, Encoder, TDecoder, TEncoder};
 
     #[test]
     fn create_decoder() {
