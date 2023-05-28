@@ -81,8 +81,7 @@ mod tests {
 
     #[test]
     fn create_encoder() {
-        let encoder =
-            Encoder::new(crate::SampleRate::Hz48000, 2, crate::Application::Audio).unwrap();
+        let _ = Encoder::new(crate::SampleRate::Hz48000, 2, crate::Application::Audio).unwrap();
     }
 
     #[test]
@@ -91,6 +90,6 @@ mod tests {
             Encoder::new(crate::SampleRate::Hz48000, 1, crate::Application::Audio).unwrap();
         let input = [0; 120];
         let mut output = [0; 1024];
-        let len = encoder.encode(&input, &mut output).unwrap();
+        let _ = encoder.encode(&input, &mut output).unwrap();
     }
 }
