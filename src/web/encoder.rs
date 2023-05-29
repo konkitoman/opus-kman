@@ -1,3 +1,5 @@
+use std::sync::atomic::AtomicUsize;
+
 use crate::{Error, TDecoder};
 use crate::{SampleRate, TEncoder};
 use js_sys::{Function, Object};
@@ -12,6 +14,7 @@ pub struct Encoder {
     sample_rate: SampleRate,
     channels: u32,
     receiver: std::sync::mpsc::Receiver<Pak>,
+    count: std::cell::Cell<usize>,
 }
 
 pub enum Pak {
@@ -48,6 +51,7 @@ impl TEncoder for Encoder {
             sample_rate: sample_rate.clone(),
             channels,
             receiver,
+            count: std::cell::Cell::new(0),
         };
 
         let Some(fn_output) = &s.fn_output else {return Err(Error::Unknown)};
@@ -58,16 +62,17 @@ impl TEncoder for Encoder {
                 .sample_rate(i32::from(sample_rate) as u32)
                 .number_of_channels(channels),
         );
+        console::info_1(&format!("Test: {}", encoder.encode_queue_size()).into());
         s.encoder = Some(encoder);
 
         Ok(s)
     }
 
-    fn encode(&mut self, input: &[i16], output: &mut [u8]) -> Result<usize, Error> {
-        console::info_1(&"Getting time".into());
+    fn encode(&self, input: &[i16], output: &mut [u8]) -> Result<usize, Error> {
+        self.count.set(self.count.get() + input.len());
+        let needed = ((i32::from(self.sample_rate.clone()) / 1000) * 20) * self.channels as i32;
 
         let timestamp = js_sys::Date::now();
-        console::info_1(&"Time get".into());
         let obj = js_sys::Int16Array::from(input).into();
         let data = AudioData::new(&AudioDataInit::new(
             &obj,
@@ -80,19 +85,33 @@ impl TEncoder for Encoder {
         .unwrap();
 
         self.encoder.as_ref().unwrap().encode(&data);
-        console::log_1(&format!("State: {:?}", self.encoder.as_ref().unwrap().state()).into());
-        if let Ok(pak) = self.receiver.try_recv() {
-            match pak {
-                Pak::Buffer(buffer) => {
-                    if output.len() <= buffer.len() {
-                        return Err(Error::BufferToSmall);
+        let count = self.count.get();
+        let wait = count >= needed as usize;
+        while true {
+            if let Ok(pak) = self.receiver.try_recv() {
+                self.count.set(self.count.get() - needed as usize);
+                match pak {
+                    Pak::Buffer(buffer) => {
+                        if output.len() <= buffer.len() {
+                            return Err(Error::BufferToSmall);
+                        }
+                        output.copy_from_slice(&buffer);
+                        return Ok(buffer.len());
                     }
-                    output.copy_from_slice(&buffer);
-                    return Ok(buffer.len());
+                    Pak::Error => {
+                        console::error_1(&"Opus encoder Error".into());
+                        break;
+                    }
                 }
-                Pak::Error => todo!(),
+            }
+            if !wait {
+                break;
             }
         }
         Ok(0)
+    }
+
+    fn encode_float(&self, input: &[f32], output: &mut [u8]) -> Result<usize, Error> {
+        todo!()
     }
 }

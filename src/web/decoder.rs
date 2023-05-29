@@ -36,4 +36,12 @@ impl TDecoder for Decoder {
 
         Ok(s)
     }
+
+    fn decode(&self, input: &[u8], output: &mut [i16], fec: bool) -> Result<usize, Error> {
+        todo!()
+    }
+
+    fn decode_float(&self, input: &[u8], output: &mut [f32], fec: bool) -> Result<usize, Error> {
+        todo!()
+    }
 }
