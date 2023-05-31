@@ -28,6 +28,8 @@ module.exports = {
 
     new WasmPackPlugin({
       crateDirectory: __dirname,
+      args: "--log-level warn",
+      extraArgs: "--target browser --mode normal"
     }),
   ]
 };

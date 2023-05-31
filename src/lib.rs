@@ -56,6 +56,8 @@ pub enum Error {
     AllocFail,
 
     Unknown,
+
+    CannotEncodeBufferToSmallWaitingForMore,
 }
 
 #[cfg(target_arch = "x86_64")]
