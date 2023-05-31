@@ -100,6 +100,39 @@ impl TEncoder for Encoder {
     }
 
     fn encode_float(&self, input: &[f32], output: &mut [u8]) -> Result<usize, Error> {
-        todo!()
+        if !input.is_empty() {
+            let timestamp = js_sys::Date::now();
+            let obj = js_sys::Float32Array::from(input).into();
+            let data = AudioData::new(&AudioDataInit::new(
+                &obj,
+                AudioSampleFormat::F32,
+                self.channels,
+                input.len() as u32 / self.channels,
+                48000.0,
+                timestamp,
+            ))
+            .unwrap();
+
+            self.encoder.as_ref().unwrap().encode(&data);
+        }
+
+        if let Ok(pak) = self.receiver.try_recv() {
+            match pak {
+                Pak::Buffer(mut buffer) => {
+                    if output.len() <= buffer.len() {
+                        return Err(Error::BufferToSmall);
+                    }
+                    let len = buffer.len();
+                    for (i, byte) in buffer.drain(..).enumerate() {
+                        output[i] = byte;
+                    }
+                    return Ok(len);
+                }
+                Pak::Error => {
+                    console::error_1(&"Opus encoder Error".into());
+                }
+            }
+        }
+        Err(Error::CannotEncodeBufferToSmallWaitingForMore)
     }
 }
