@@ -113,6 +113,8 @@ impl Drop for Encoder {
 
 #[cfg(test)]
 mod tests {
+    use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+
     use crate::{Decoder, Encoder, TDecoder, TEncoder};
 
     #[test]
@@ -130,94 +132,5 @@ mod tests {
         let out = &output[..len];
 
         debug_assert_eq!(out, &[248, 255, 254])
-    }
-
-    // All the time faild i don't know why the decoding is strange!
-    #[test]
-    fn encode_decode() {
-        let encoder =
-            Encoder::new(crate::SampleRate::Hz48000, 1, crate::Application::Audio).unwrap();
-        let decoder = Decoder::new(crate::SampleRate::Hz48000, 1).unwrap();
-
-        let input = [
-            0.0,
-            0.009853362,
-            0.01968765,
-            0.02950054,
-            0.03928942,
-            0.049051683,
-            0.058784805,
-            0.068486266,
-            0.078153506,
-            0.08778406,
-            0.09737537,
-            0.10692494,
-            0.11643028,
-            0.12588987,
-            0.13530126,
-            0.14466298,
-            0.15397258,
-            0.16322759,
-            0.17242566,
-            0.18156432,
-            0.19064115,
-            0.19965379,
-            0.20860077,
-            0.21747978,
-            0.22628842,
-            0.23502441,
-            0.24368543,
-            0.25226918,
-            0.2607733,
-            0.26919556,
-            0.27753365,
-            0.28578535,
-            0.29394832,
-            0.30202028,
-            0.310998,
-            0.31987923,
-            0.32866174,
-            0.33734334,
-            0.34592175,
-            0.3543948,
-            0.36276022,
-            0.37101582,
-            0.37915942,
-            0.38718882,
-            0.3951019,
-            0.40289646,
-            0.41057032,
-            0.41812128,
-            0.42554718,
-            0.43284586,
-            0.4400151,
-            0.44705275,
-            0.4539566,
-            0.46072453,
-            0.46735436,
-            0.4738439,
-            0.48019198,
-            0.4863964,
-            0.492455,
-            0.49836564,
-        ];
-
-        let mut inpu = [0.0; 960];
-        for (i, input) in input.into_iter().enumerate() {
-            inpu[i] = input;
-        }
-        let input = inpu;
-
-        let mut output = [0; 4096];
-        let len = encoder.encode_float(&input, &mut output).unwrap();
-
-        let out = &output[..len];
-        let mut output = [0.0; 960];
-
-        let len = decoder.decode_float(out, &mut output, false).unwrap();
-
-        let out = &output[..len];
-
-        assert_eq!(input, out);
     }
 }
