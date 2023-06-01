@@ -41,9 +41,10 @@ impl TDecoder for Decoder {
                 input.len() as i32,
                 output.as_mut_ptr(),
                 (output.len()
-                    - (output.len() % i32::from(self.sample_rate.clone()) as usize / 1000
-                        * 20
-                        * self.channels as usize)) as i32,
+                    - (output.len()
+                        % (i32::from(self.sample_rate.clone()) as usize / 1000
+                            * 20
+                            * self.channels as usize))) as i32,
                 fec as i32,
             )
         };
@@ -68,9 +69,10 @@ impl TDecoder for Decoder {
                 input.len() as i32,
                 output.as_mut_ptr(),
                 (output.len()
-                    - (output.len() % i32::from(self.sample_rate.clone()) as usize / 1000
-                        * 20
-                        * self.channels as usize)) as i32,
+                    - (output.len()
+                        % (i32::from(self.sample_rate.clone()) as usize / 1000
+                            * 20
+                            * self.channels as usize))) as i32,
                 fec as i32,
             )
         };
