@@ -58,6 +58,8 @@ pub enum Error {
     Unknown,
 
     CannotEncodeBufferToSmallWaitingForMore,
+    /// Whould not be recalled in a loop because browser thread will be blocked and nothing will happend
+    NeedAReCall,
 }
 
 #[cfg(target_arch = "x86_64")]

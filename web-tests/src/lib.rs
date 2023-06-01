@@ -27,7 +27,12 @@ fn main() {
                 &Closure::<dyn FnMut()>::new(move || {
                     res = encoder.encode(&[], &mut output);
                     if let Ok(len) = res {
+                        let decoder = Decoder::new(SampleRate::Hz48000, 2).unwrap();
                         console::info_1(&format!("Out: {:?}", &output[0..len]).into());
+                        let out = &output[..len];
+                        let mut output = [0; 4096];
+                        let res = decoder.decode(out, &mut output, false);
+                        console::log_1(&format!("Res: {res:?}").into());
                     }
                 })
                 .into_js_value()
