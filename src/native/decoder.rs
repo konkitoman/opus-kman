@@ -40,7 +40,10 @@ impl TDecoder for Decoder {
                 ptr,
                 input.len() as i32,
                 output.as_mut_ptr(),
-                (120 * self.channels) as i32,
+                (output.len()
+                    - (output.len() % i32::from(self.sample_rate.clone()) as usize / 1000
+                        * 20
+                        * self.channels as usize)) as i32,
                 fec as i32,
             )
         };
@@ -64,7 +67,10 @@ impl TDecoder for Decoder {
                 ptr,
                 input.len() as i32,
                 output.as_mut_ptr(),
-                (output.len()) as i32,
+                (output.len()
+                    - (output.len() % i32::from(self.sample_rate.clone()) as usize / 1000
+                        * 20
+                        * self.channels as usize)) as i32,
                 fec as i32,
             )
         };
@@ -74,6 +80,14 @@ impl TDecoder for Decoder {
             Ok(res as usize)
         } else {
             Err(error)
+        }
+    }
+}
+
+impl Drop for Decoder {
+    fn drop(&mut self) {
+        unsafe {
+            audiopus_sys::opus_decoder_destroy(self.decoder);
         }
     }
 }
@@ -90,19 +104,24 @@ mod tests {
     #[test]
     fn encode_decode() {
         let encoder =
-            Encoder::new(crate::SampleRate::Hz48000, 1, crate::Application::VOIP).unwrap();
+            Encoder::new(crate::SampleRate::Hz48000, 1, crate::Application::Audio).unwrap();
         let decoder = Decoder::new(crate::SampleRate::Hz48000, 1).unwrap();
 
-        let input = [0; 120];
+        let input = [0; 48000 / 1000 * 20];
         let mut output = [0; 1024];
 
         let len = encoder.encode(&input, &mut output).unwrap();
-        let out = &output[0..len];
+        let out = &output[..len];
 
-        let mut output = [0; 1024];
+        println!("Out: {out:?}");
+
+        let mut output = [0; 4096];
 
         let len = decoder.decode(out, &mut output, false).unwrap();
         let out = &output[..len];
+
+        println!("Out: {}", out.len());
+        println!("Input: {}", input.len());
 
         assert_eq!(out, input);
     }
@@ -110,16 +129,18 @@ mod tests {
     #[test]
     fn encode_decode_float() {
         let encoder =
-            Encoder::new(crate::SampleRate::Hz48000, 1, crate::Application::VOIP).unwrap();
+            Encoder::new(crate::SampleRate::Hz48000, 1, crate::Application::Audio).unwrap();
         let decoder = Decoder::new(crate::SampleRate::Hz48000, 1).unwrap();
 
-        let input = [0.0; 120];
-        let mut output = [0; 1024];
+        let input = [0.0; 48000 / 1000 * 20];
+        let mut output = [0; 4096];
 
         let len = encoder.encode_float(&input, &mut output).unwrap();
-        let out = &output[0..len];
+        let out = &output[..len];
 
-        let mut output = [0.0; 120];
+        println!("Out: {out:?}");
+
+        let mut output = [0.0; 48000 / 1000 * 20];
 
         let len = decoder.decode_float(out, &mut output, true).unwrap();
         let out = &output[..len];

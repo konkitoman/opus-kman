@@ -62,7 +62,7 @@ pub enum Error {
     NeedAReCall,
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(not(target = "wasm32"))]
 impl From<i32> for Error {
     fn from(value: i32) -> Self {
         use audiopus_sys::{
@@ -85,16 +85,16 @@ impl From<i32> for Error {
 #[derive(Default, Clone, Debug)]
 pub enum Application {
     ///Best for broadcast/high-fidelity application where the decoded audio should be as close as possible to the input.
+    #[default]
     Audio,
     ///Only use when lowest-achievable latency is what matters most.
     ///Voice-optimized modes cannot be used.
     RestrictedLowdelay,
     ///Best for most VoIP/videoconference applications where listening quality and intelligibility matter most.
-    #[default]
     VOIP,
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(not(target = "wasm32"))]
 impl From<Application> for i32 {
     fn from(value: Application) -> Self {
         use audiopus_sys::{
