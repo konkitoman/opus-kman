@@ -86,18 +86,22 @@ impl TDecoder for Decoder {
                     if buffer.len() >= output.len() {
                         return Err(Error::BufferToSmall);
                     }
+                    let len = buffer.len();
                     for (i, byte) in buffer.drain(..).enumerate() {
                         output[i] = byte;
                     }
+                    return Ok(len);
                 }
                 Pak::BufferF32(mut buffer) => {
                     if buffer.len() >= output.len() {
                         return Err(Error::BufferToSmall);
                     }
+                    let len = buffer.len();
                     let scale = std::i16::MAX as f32;
                     for (i, byte) in buffer.drain(..).enumerate() {
                         output[i] = (byte * scale).max(scale).min(std::i16::MIN as f32) as i16;
                     }
+                    return Ok(len);
                 }
                 Pak::Error => return Err(Error::Unknown),
             }
@@ -116,30 +120,34 @@ impl TDecoder for Decoder {
                 .unwrap(),
             );
         }
-
         if let Ok(pak) = self.receiver.try_recv() {
             match pak {
                 Pak::BufferI16(mut buffer) => {
                     if buffer.len() >= output.len() {
                         return Err(Error::BufferToSmall);
                     }
+                    let len = buffer.len();
                     for (i, byte) in buffer.drain(..).enumerate() {
                         let scale = 1.0 / std::u16::MAX as f32;
                         output[i] = byte as f32 * scale;
                     }
+                    return Ok(len);
                 }
                 Pak::BufferF32(mut buffer) => {
                     if buffer.len() >= output.len() {
                         return Err(Error::BufferToSmall);
                     }
+                    let len = buffer.len();
                     let scale = std::i16::MAX as f32;
                     for (i, byte) in buffer.drain(..).enumerate() {
                         output[i] = byte;
                     }
+                    return Ok(len);
                 }
                 Pak::Error => return Err(Error::Unknown),
             }
         }
+
         Err(Error::CannotEncodeBufferToSmallWaitingForMore)
     }
 }

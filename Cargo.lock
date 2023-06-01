@@ -93,6 +93,7 @@ dependencies = [
  "audiopus_sys",
  "js-sys",
  "wasm-bindgen",
+ "wasm-bindgen-futures 0.4.36",
  "web-sys",
 ]
 
@@ -206,6 +207,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-bindgen-futures"
+version = "0.4.36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d1985d03709c53167ce907ff394f5316aa22cb4e12761295c5dc57dacb6297e"
+dependencies = [
+ "cfg-if 1.0.0",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
 name = "wasm-bindgen-macro"
 version = "0.2.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -245,7 +258,7 @@ dependencies = [
  "js-sys",
  "scoped-tls",
  "wasm-bindgen",
- "wasm-bindgen-futures",
+ "wasm-bindgen-futures 0.3.27",
  "wasm-bindgen-test-macro",
 ]
 
@@ -277,7 +290,7 @@ dependencies = [
  "js-sys",
  "opus-kman",
  "wasm-bindgen",
- "wasm-bindgen-futures",
+ "wasm-bindgen-futures 0.3.27",
  "wasm-bindgen-test",
  "web-sys",
 ]
