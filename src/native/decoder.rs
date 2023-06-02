@@ -126,6 +126,12 @@ impl TDecoder for Decoder {
             Err(res.into())
         }
     }
+
+    fn reset(&self) {
+        unsafe {
+            audiopus_sys::opus_decoder_ctl(self.decoder, audiopus_sys::OPUS_RESET_STATE as i32);
+        }
+    }
 }
 
 impl Drop for Decoder {

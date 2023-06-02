@@ -103,6 +103,78 @@ impl TEncoder for Encoder {
             Err(Error::CannotEncodeBufferToSmallWaitingForMore)
         }
     }
+
+    fn get_sample_rate(&self) -> SampleRate {
+        self.sample_rate.clone()
+    }
+
+    fn set_sample_rate(&mut self, sample_rate: SampleRate) -> Result<(), Error> {
+        let res = unsafe {
+            audiopus_sys::opus_encoder_init(
+                self.encoder,
+                sample_rate.clone().into(),
+                self.channels as i32,
+                self.application.clone().into(),
+            )
+        };
+
+        if res == audiopus_sys::OPUS_OK {
+            self.sample_rate = sample_rate;
+            Ok(())
+        } else {
+            Err(res.into())
+        }
+    }
+
+    fn get_channels(&self) -> u32 {
+        self.channels
+    }
+
+    fn set_channels(&mut self, channels: u32) -> Result<(), Error> {
+        let res = unsafe {
+            audiopus_sys::opus_encoder_init(
+                self.encoder,
+                self.sample_rate.clone().into(),
+                channels as i32,
+                self.application.clone().into(),
+            )
+        };
+
+        if res == audiopus_sys::OPUS_OK {
+            self.channels = channels;
+            Ok(())
+        } else {
+            Err(res.into())
+        }
+    }
+
+    fn get_application(&self) -> Application {
+        self.application.clone()
+    }
+
+    fn set_application(&mut self, application: Application) -> Result<(), Error> {
+        let res = unsafe {
+            audiopus_sys::opus_encoder_init(
+                self.encoder,
+                self.sample_rate.clone().into(),
+                self.channels as i32,
+                application.clone().into(),
+            )
+        };
+
+        if res == audiopus_sys::OPUS_OK {
+            self.application = application;
+            Ok(())
+        } else {
+            Err(res.into())
+        }
+    }
+
+    fn reset(&self) {
+        unsafe {
+            audiopus_sys::opus_encoder_ctl(self.encoder, audiopus_sys::OPUS_RESET_STATE as i32);
+        }
+    }
 }
 
 impl Drop for Encoder {
