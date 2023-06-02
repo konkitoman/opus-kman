@@ -129,7 +129,7 @@ impl TDecoder for Decoder {
 
     fn reset(&self) {
         unsafe {
-            audiopus_sys::opus_decoder_ctl(self.decoder, audiopus_sys::OPUS_RESET_STATE as i32);
+            audiopus_sys::opus_decoder_ctl(self.decoder, audiopus_sys::OPUS_RESET_STATE);
         }
     }
 }

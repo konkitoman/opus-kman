@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use crate::{Application, Error, SampleRate, TEncoder};
 
@@ -172,7 +172,7 @@ impl TEncoder for Encoder {
 
     fn reset(&self) {
         unsafe {
-            audiopus_sys::opus_encoder_ctl(self.encoder, audiopus_sys::OPUS_RESET_STATE as i32);
+            audiopus_sys::opus_encoder_ctl(self.encoder, audiopus_sys::OPUS_RESET_STATE);
         }
     }
 }
@@ -185,9 +185,8 @@ impl Drop for Encoder {
 
 #[cfg(test)]
 mod tests {
-    use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
-    use crate::{Decoder, Encoder, TDecoder, TEncoder};
+    use crate::{Encoder, TEncoder};
 
     #[test]
     fn create_encoder() {
