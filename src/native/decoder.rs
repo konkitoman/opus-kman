@@ -84,6 +84,48 @@ impl TDecoder for Decoder {
             Err(error)
         }
     }
+
+    fn get_sample_rate(&self) -> SampleRate {
+        self.sample_rate.clone()
+    }
+
+    fn set_sample_rate(&mut self, sample_rate: SampleRate) -> Result<(), Error> {
+        let res = unsafe {
+            audiopus_sys::opus_decoder_init(
+                self.decoder,
+                sample_rate.clone().into(),
+                self.channels as i32,
+            )
+        };
+
+        if res == audiopus_sys::OPUS_OK {
+            self.sample_rate = sample_rate;
+            Ok(())
+        } else {
+            Err(res.into())
+        }
+    }
+
+    fn get_channels(&self) -> u32 {
+        self.channels
+    }
+
+    fn set_channels(&mut self, channels: u32) -> Result<(), Error> {
+        let res = unsafe {
+            audiopus_sys::opus_decoder_init(
+                self.decoder,
+                self.sample_rate.clone().into(),
+                channels as i32,
+            )
+        };
+
+        if res == audiopus_sys::OPUS_OK {
+            self.channels = channels;
+            Ok(())
+        } else {
+            Err(res.into())
+        }
+    }
 }
 
 impl Drop for Decoder {
