@@ -8,13 +8,10 @@ edition = "2021"
 [workspace]
 members = ["web-tests"]
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-audiopus_sys = "0.2"
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { version = "0.3", features = ["AudioEncoder", "AudioDecoder", "AudioDecoderConfig", "AudioEncoderConfig", "AudioEncoderInit", "AudioEncoderSupport", "AudioDecoderInit", "AudioDecoderSupport", "EncodedAudioChunkInit", "AudioData", "EncodedAudioChunk", "CodecState", "AudioDataInit", "AudioSampleFormat", "EncodedAudioChunkType", "AudioDataCopyToOptions"] }
-js-sys = "0.3"
-wasm-bindgen = "0.2"
-
 [dependencies]
-wasm-bindgen-futures = "0.4.36"
+audiopus_sys = "0.2"
+cpal = "0.15"
+bytes-kman = "0.3"
+log = "0.4"
+
+

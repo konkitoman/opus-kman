@@ -1,20 +1,9 @@
+pub mod bandwidth;
 mod decoder;
 mod encoder;
-
-#[cfg(not(target_arch = "wasm32"))]
-mod native;
-
-#[cfg(target_arch = "wasm32")]
-mod web;
-
-pub use decoder::TDecoder;
-pub use encoder::TEncoder;
-
-#[cfg(not(target_arch = "wasm32"))]
-pub use native::{Decoder, Encoder};
-
-#[cfg(target_arch = "wasm32")]
-pub use web::{Decoder, Encoder};
+pub mod frame_packing;
+pub mod mode;
+pub mod packet;
 
 #[derive(Clone, Default)]
 pub enum SampleRate {
