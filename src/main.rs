@@ -11,9 +11,9 @@ fn main() {
     unsafe {
         let mut error = 0;
         // 8, 12, 16, 24, 48
-        const freq: i32 = 8;
+        const freq: i32 = 48;
         // 1, 2
-        const channels: i32 = 1;
+        const channels: i32 = 2;
         let encoder = audiopus_sys::opus_encoder_create(
             freq * 1000,
             channels,
@@ -30,14 +30,15 @@ fn main() {
             output.len() as i32,
         );
         let mut out = output[..res as usize].to_vec();
+
         let pak = Packet::from_bytes(&mut out).unwrap();
         println!("Packet: {pak:?}");
 
-        let output: String = out
-            .iter()
-            .map(|b| format!("{:08b}", b))
-            .collect::<Vec<String>>()
-            .join(", ");
-        println!("Out: {output}");
+        // let output: String = out
+        //     .iter()
+        //     .map(|b| format!("{:08b}", b))
+        //     .collect::<Vec<String>>()
+        //     .join(", ");
+        // println!("Out: {output}");
     }
 }

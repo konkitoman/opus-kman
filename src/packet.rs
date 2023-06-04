@@ -8,6 +8,7 @@ pub struct Packet {
     bandwidth: Bandwidth,
     stereo: bool,
     frame_packing: FramePacking,
+    data: Vec<u8>,
 }
 
 impl TBytes for Packet {
@@ -23,15 +24,17 @@ impl TBytes for Packet {
     where
         Self: Sized,
     {
-        let Some(byte) = buffer.drain(..1).next() else{return None};
+        buffer.reverse();
+        let Some(byte) = buffer.pop() else{return None};
 
         println!("Config: {byte:08b}");
 
-        let config = byte >> 3 & 31;
-        let stereo = (byte >> 2 & 1) > 0;
-        let Ok(frame_packing) = FramePacking::try_from(byte & 3) else {
+        let config = byte >> 3u8 & 31;
+        let stereo = (byte >> 2u8 & 1) > 0;
+        let Some(frame_packing) = FramePacking::new(buffer, byte & 3) else {
             log::error!("Invalid packet frame_packing");
-            buffer.insert(0, byte);
+            buffer.push(byte);
+            buffer.reverse();
             return None;
         };
 
@@ -52,84 +55,25 @@ impl TBytes for Packet {
             }
         };
 
-        let Some(byte2) = buffer.drain(..1).next() else{
-            log::error!("No seccond byte!");
-            buffer.insert(0, byte);
-            return None};
-
-        let size = match byte2 {
-            0 => 0,
-            1..=251 => byte2 as usize,
-            252..=255 => {
-                let Some(byte3) = buffer.drain(0..).next() else{
-                    log::error!("Need one more byte for the frame length");
-                    buffer.insert(0, byte2);
-                    buffer.insert(0, byte);
-                    return None
-                };
-
-                (byte3 as usize * 4) + byte2 as usize
-            }
-        };
-
-        if size == 0 {
-            panic!("Size 0");
+        let mut data = Vec::with_capacity(buffer.len());
+        while let Some(byte) = buffer.pop() {
+            data.push(byte)
         }
-
-        let frames = match frame_packing {
-            FramePacking::OneFrame => {
-                let size = size - 1;
-                println!("Frame size: {size}");
-            }
-            FramePacking::TowFramesSameSize => {
-                let size = (size - 1) / 2;
-                println!("Frame size: {size}");
-            }
-            FramePacking::TowFrames => {
-                let Some(byte3) = buffer.drain(..1).next() else{
-                log::error!("No seccond byte!");
-                buffer.insert(0, byte);
-                return None};
-
-                let mut bytes = 2;
-
-                let size1 = match byte3 {
-                    0 => 0,
-                    1..=251 => byte3 as usize,
-                    252..=255 => {
-                        let Some(byte4) = buffer.drain(0..).next() else{
-                            log::error!("Need one more byte for the frame length");
-                            buffer.insert(0, byte3);
-                            buffer.insert(0, byte2);
-                            buffer.insert(0, byte);
-                        return None};
-                        bytes += 1;
-                        (byte3 as usize * 4) + byte2 as usize
-                    }
-                };
-
-                let size2 = (size - size1) - bytes;
-
-                println!("Size1: {size1}");
-                println!("Size2: {size2}");
-
-                todo!()
-            }
-            FramePacking::Arbitrary => {
-                let Some(config) = buffer.drain(..1).next() else{
-                    buffer.insert(0, byte2);
-                    buffer.insert(0, byte);
-                    return None
-                };
-                todo!()
-            }
-        };
 
         Some(Self {
             mode,
             bandwidth,
             stereo,
             frame_packing,
+            data,
         })
     }
 }
+// // n -1 this is an non inclusive range so n
+//                 let ft: u16 = (0..n).map(|i| data[i] as u16).sum();
+//                 fn fl(f: &[u8], k: usize) -> u16 {
+//                     (0..k).map(|i| f[i] as u16).sum::<u16>()
+//                 }
+//                 fn fh(f: &[u8], k: usize) -> u16 {
+//                     fl(f, k) + f[k] as u16
+//                 };
