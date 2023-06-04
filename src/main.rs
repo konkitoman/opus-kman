@@ -1,5 +1,5 @@
 use bytes_kman::TBytes;
-use opus_kman::packet::Packet;
+use opus_kman::{decoder::Decoder, packet::Packet};
 
 fn ilog(a: f64) -> f64 {
     a.log2().floor() + 1.0
@@ -11,9 +11,9 @@ fn main() {
     unsafe {
         let mut error = 0;
         // 8, 12, 16, 24, 48
-        const freq: i32 = 48;
+        const freq: i32 = 8;
         // 1, 2
-        const channels: i32 = 2;
+        const channels: i32 = 1;
         let encoder = audiopus_sys::opus_encoder_create(
             freq * 1000,
             channels,
@@ -31,8 +31,12 @@ fn main() {
         );
         let mut out = output[..res as usize].to_vec();
 
+        let mut decoder = Decoder::new(freq as u32, 1);
+
         let pak = Packet::from_bytes(&mut out).unwrap();
         println!("Packet: {pak:?}");
+
+        decoder.decode(pak);
 
         // let output: String = out
         //     .iter()

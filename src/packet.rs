@@ -4,11 +4,11 @@ use crate::{bandwidth::Bandwidth, frame_packing::FramePacking, mode::Mode};
 
 #[derive(Clone, Debug)]
 pub struct Packet {
-    mode: Mode,
-    bandwidth: Bandwidth,
-    stereo: bool,
-    frame_packing: FramePacking,
-    data: Vec<u8>,
+    pub mode: Mode,
+    pub bandwidth: Bandwidth,
+    pub stereo: bool,
+    pub frame_packing: FramePacking,
+    pub data: Vec<u8>,
 }
 
 impl TBytes for Packet {
@@ -69,11 +69,3 @@ impl TBytes for Packet {
         })
     }
 }
-// // n -1 this is an non inclusive range so n
-//                 let ft: u16 = (0..n).map(|i| data[i] as u16).sum();
-//                 fn fl(f: &[u8], k: usize) -> u16 {
-//                     (0..k).map(|i| f[i] as u16).sum::<u16>()
-//                 }
-//                 fn fh(f: &[u8], k: usize) -> u16 {
-//                     fl(f, k) + f[k] as u16
-//                 };
